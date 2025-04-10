@@ -32,4 +32,4 @@ It automatically detects your PostgreSQL service, reflects the current server st
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/kernel64/pgninja.git](https://github.com/kernel64/PgNinja.git)
+   git clone https://github.com/kernel64/PgNinja.git
