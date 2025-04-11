@@ -1,0 +1,58 @@
+name: Build Release Binaries
+
+on:
+  push:
+    branches:
+      - 'release/*.*.*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Extract Version Number
+        id: extract_version
+        run: echo "::set-output name=version::${GITHUB_REF##*/}"
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '4.7.x'
+      - name: Setup MSVC environment
+        uses: microsoft/setup-msbuild@v1
+#        with:
+#          vs-version: '2022'
+
+      - name: Restore NuGet packages
+        run: nuget restore PgNinja.sln
+
+      - name: Build x86 solution
+        run: msbuild /p:Configuration=Release /p:Platform=x86 PgNinja.sln
+
+      - name: Upload x86 Release Asset
+        id: upload_x86_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Release/PgNinja.exe
+          asset_name: PgNinja_x86_${{ steps.extract_version.outputs.version }}.exe
+          asset_content_type: application/octet-stream
+
+      - name: Build x64 solution
+        run: msbuild /p:Configuration=Release /p:Platform=x64 PgNinja.sln
+
+      - name: Upload x64 Release Asset
+        id: upload_x64_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./x64/Release/PgNinja.exe
+          asset_name: PgNinja_x64_${{ steps.extract_version.outputs.version }}.exe
+          asset_content_type: application/octet-stream
