@@ -31,7 +31,7 @@ jobs:
 
     - name: Extract Version Number
       id: extract_version
-      run: echo "name=version::${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+      run: echo "version=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
