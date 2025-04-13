@@ -51,7 +51,7 @@ jobs:
       with:
         name: PgNinja-${{ steps.extract_version.outputs.version }}
         path: |
-          **\bin\${{env.BUILD_CONFIGURATION}}\*.exe
+          **\x64\Release\${{env.BUILD_CONFIGURATION}}\*.exe
 
     - name: Build the Inno Setup Installer
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
