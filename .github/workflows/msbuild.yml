@@ -1,58 +1,47 @@
-name: Build Release Binaries
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: MSBuild
 
 on:
   push:
     branches:
       - 'release/*.*.*'
 
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: PgNinja.sln
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-      - name: Extract Version Number
-        id: extract_version
-        run: echo "::set-output name=version::${GITHUB_REF##*/}"
+    - name: Extract Version Number
+      id: extract_version
+      run: echo "::set-output name=version::${GITHUB_REF##*/}"
 
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '4.7.x'
-      - name: Setup MSVC environment
-        uses: microsoft/setup-msbuild@v1
-        with:
-          vs-version: '2022'
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Restore NuGet packages
-        run: nuget restore PgNinja.sln
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
-      - name: Build x86 solution
-        run: msbuild /p:Configuration=Release /p:Platform=x86 PgNinja.sln
-
-      - name: Upload x86 Release Asset
-        id: upload_x86_release_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Release/PgNinja.exe
-          asset_name: PgNinja_x86_${{ steps.extract_version.outputs.version }}.exe
-          asset_content_type: application/octet-stream
-
-      - name: Build x64 solution
-        run: msbuild /p:Configuration=Release /p:Platform=x64 PgNinja.sln
-
-      - name: Upload x64 Release Asset
-        id: upload_x64_release_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./x64/Release/PgNinja.exe
-          asset_name: PgNinja_x64_${{ steps.extract_version.outputs.version }}.exe
-          asset_content_type: application/octet-stream
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
