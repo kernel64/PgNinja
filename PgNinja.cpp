@@ -7,6 +7,7 @@
 #include "resource.h"
 
 #define WM_TRAYICON (WM_USER + 1)
+#define ID_TRAY_ABOUT 1005
 #define ID_TRAY_START 1001
 #define ID_TRAY_STOP  1002
 #define ID_TRAY_RESTART 1003
@@ -162,6 +163,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             ControlService("start", serviceName);
             UpdateIcon(GetModuleHandle(NULL), IDI_ICON_GREEN);
             break;
+		case ID_TRAY_ABOUT:
+            MessageBox(
+                NULL,
+                "PgNinja — PostgreSQL Tray Controller\n\n"
+                "Version 1.0.0\n"
+                "Developed by Mohamed Aymen\n"
+                "MIT Licensed\n\n"
+                "https://github.com/kernel64/PgNinja",
+                "About PgNinja",
+                MB_ICONINFORMATION | MB_OK
+            );
+            break;
         case ID_TRAY_EXIT:
             Shell_NotifyIcon(NIM_DELETE, &nid);
             PostQuitMessage(0);
@@ -224,6 +237,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     Shell_NotifyIcon(NIM_ADD, &nid);
 
     hMenu = CreatePopupMenu();
+    AppendMenu(hMenu, MF_STRING, ID_TRAY_ABOUT, "About!");
+    AppendMenu(hMenu, MF_SEPARATOR, 0, NULL);
     AppendMenu(hMenu, MF_STRING, ID_TRAY_START, "Start");
     AppendMenu(hMenu, MF_STRING, ID_TRAY_STOP, "Stop");
     AppendMenu(hMenu, MF_STRING, ID_TRAY_RESTART, "Restart");
