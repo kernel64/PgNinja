@@ -53,10 +53,11 @@ jobs:
         path: |
           **\bin\${{env.BUILD_CONFIGURATION}}\*.exe
 
-    - name: Setup Inno Setup
-      uses: Minionguyjpro/Inno-Setup-Action@v1.2
+    - name: Build the Inno Setup Installer
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
-        iss-file: 'PgNinjaSetup.iss'
+        path: 'PgNinjaSetup.iss'
+        options: /O+
 
     - name: Upload Installer Artifact
       uses: actions/upload-artifact@v4
