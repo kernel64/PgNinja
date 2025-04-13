@@ -31,7 +31,7 @@ jobs:
 
     - name: Extract Version Number
       id: extract_version
-      run: echo "::set-output name=version::${GITHUB_REF##*/}"
+      run: echo "name=version::${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
@@ -45,3 +45,22 @@ jobs:
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PgNinja-${{ steps.extract_version.outputs.version }}
+        path: |
+          **\bin\${{env.BUILD_CONFIGURATION}}\*.exe
+
+    - name: Setup Inno Setup
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2
+      with:
+        iss-file: 'PgNinjaSetup.iss'
+
+    - name: Upload Installer Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PgNinja-Installer-${{ steps.extract_version.outputs.version }}
+        path: Output/*.exe
+
